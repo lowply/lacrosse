@@ -31,6 +31,20 @@ $ cp lacrosse/lacrosse /usr/local/bin/
 ~/.cache/lacrosse.log
 ```
 
+## Errors
+
+If you see this error:
+
+```
+ValueError: unknown locale: UTF-8
+```
+
+Try
+
+```
+export LC_ALL=en_US.UTF-8
+```
+
 ## License
 
 MIT
