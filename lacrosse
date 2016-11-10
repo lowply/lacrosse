@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Source: https://github.com/lowply/lacrosse
 
 set -e
 
