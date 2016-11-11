@@ -47,7 +47,7 @@ fi
 
 cat << EOT > ${BATCHFILE}
 {
-	"Comment": "Updated by updater53.sh",
+	"Comment": "Updated by lacrosse: github.com/lowply/lacrosse",
 	"Changes": [
 		{
 			"Action": "UPSERT",
