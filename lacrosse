@@ -4,17 +4,17 @@
 
 set -e
 
-error(){
+abort(){
 	echo "${1}"
 	exit 1
 }
 
 usage(){
-	error "Usage : lacrosse [domain] [type] [record] [TTL] [awscli profile]"
+	abort "Usage : lacrosse [domain] [type] [record] [TTL] [awscli profile]"
 }
 
 has(){
-	type ${1} >/dev/null 2>&1 || error "Error: ${1} is not installed"
+	type ${1} >/dev/null 2>&1 || abort "Error: ${1} is not installed"
 }
 
 has host
@@ -26,20 +26,18 @@ has jq
 
 LOGFILE="${HOME}/.cache/lacrosse.log"
 BATCHFILE="${HOME}/.cache/lacrosse_batch.json"
-DATE=$(date)
 FQDN=$1
 TYPE=$2
 RECORD=$3
 TTL=$4
 PROFILE=$5
-
 TLD=$(echo ${FQDN} | awk -F. '{print $NF}')
 DOMAIN=$(echo ${FQDN} | awk -F. '{print $(NF-1)}').${TLD}
-SUBDOMAIN=$(echo ${FQDN} | sed "s/\.${DOMAIN}//g")
 R53="aws --profile ${PROFILE} route53"
+
 HOSTED_ZONE_ID=$(${R53} list-hosted-zones --output json | jq -r ".HostedZones[] | select(.Name == \"${DOMAIN}.\").Id" | sed -e 's/\/hostedzone\///g')
 
-[ -z "${HOSTED_ZONE_ID}" ] && error "\"${DOMAIN}\" not found in your Route53 zones."
+[ -z "${HOSTED_ZONE_ID}" ] && abort "\"${DOMAIN}\" not found in your Route53 zones."
 
 if [ ${TYPE} == "TXT" ]; then
 	RECORD="\\\"${RECORD}\\\""
@@ -47,22 +45,22 @@ fi
 
 cat << EOT > ${BATCHFILE}
 {
-	"Comment": "Updated by lacrosse: github.com/lowply/lacrosse",
-	"Changes": [
-		{
-			"Action": "UPSERT",
-			"ResourceRecordSet": {
-				"Name": "${SUBDOMAIN}.${DOMAIN}",
-				"Type": "${TYPE}",
-				"TTL": ${TTL},
-				"ResourceRecords": [
-					{
-						"Value": "${RECORD}"
-					}
-				]
-			}
-		}
-	]
+    "Comment": "Updated by lacrosse: github.com/lowply/lacrosse",
+    "Changes": [
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "${FQDN}",
+                "Type": "${TYPE}",
+                "TTL": ${TTL},
+                "ResourceRecords": [
+                    {
+                        "Value": "${RECORD}"
+                    }
+                ]
+            }
+        }
+    ]
 }
 EOT
 
@@ -70,7 +68,7 @@ RESULT=$(${R53} change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} -
 
 cat << EOL >> ${LOGFILE}
 
-Executed on     : ${DATE}
+Executed on     : $(date)
 Hosted zone ID  : ${HOSTED_ZONE_ID}
 Public DNS name : ${FQDN}
 Type            : ${TYPE}
