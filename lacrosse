@@ -17,82 +17,102 @@ has(){
 	type ${1} >/dev/null 2>&1 || abort "Error: ${1} is not installed"
 }
 
-has host
-has aws
-has jq
-
-[ $# -ne 5 ] && usage
-[ -d ${HOME}/.cache ] || mkdir ${HOME}/.cache 
-
-LOGFILE="${HOME}/.cache/lacrosse.log"
-BATCHFILE="${HOME}/.cache/lacrosse_batch.json"
-FQDN=$1
-TYPE=$2
-RECORD=$3
-TTL=$4
-PROFILE=$5
-TLD=$(echo ${FQDN} | awk -F. '{print $NF}')
-DOMAIN=$(echo ${FQDN} | awk -F. '{print $(NF-1)}').${TLD}
-R53="aws --profile ${PROFILE} route53"
-
-HOSTED_ZONE_ID=$(${R53} list-hosted-zones --output json | jq -r ".HostedZones[] | select(.Name == \"${DOMAIN}.\").Id" | sed -e 's/\/hostedzone\///g')
-
-[ -z "${HOSTED_ZONE_ID}" ] && abort "\"${DOMAIN}\" not found in your Route53 zones."
-
-if [ ${TYPE} == "TXT" ]; then
-	RECORD="\\\"${RECORD}\\\""
-fi
-
-cat << EOT > ${BATCHFILE}
-{
-    "Comment": "Updated by lacrosse: github.com/lowply/lacrosse",
-    "Changes": [
-        {
-            "Action": "UPSERT",
-            "ResourceRecordSet": {
-                "Name": "${FQDN}",
-                "Type": "${TYPE}",
-                "TTL": ${TTL},
-                "ResourceRecords": [
-                    {
-                        "Value": "${RECORD}"
-                    }
-                ]
-            }
-        }
-    ]
-}
-EOT
-
-RESULT=$(${R53} change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch "file://${BATCHFILE}")
-
-cat << EOL >> ${LOGFILE}
-
-Executed on     : $(date)
-Hosted zone ID  : ${HOSTED_ZONE_ID}
-Public DNS name : ${FQDN}
-Type            : ${TYPE}
-Record          : ${RECORD}
-TTL             : ${TTL}
-Used profile    : ${PROFILE}
-EOL
-
-CHANGE_ID=$(echo ${RESULT} | jq -r .ChangeInfo.Id | sed -e 's/\/change\///g')
-echo "Change requested"
-echo "${RESULT}"
-
-while true
-do
-	STATUS=$(${R53} get-change --id ${CHANGE_ID} | jq -r .ChangeInfo.Status)
-	echo "Status: ${STATUS}"
-	if [ "${STATUS}" = "INSYNC" ]; then
-		echo "Done"
-		break
+generate_batchfile(){
+	if [ ${TYPE} == "TXT" ]; then
+		RECORD="\\\"${RECORD}\\\""
 	fi
-	sleep 2
-done
 
-echo "Checking result..."
-sleep 2
-echo "host -t ${TYPE} ${FQDN}"
-host -t ${TYPE} ${FQDN}
+	cat << EOT > ${BATCHFILE}
+    {
+        "Comment": "Updated by lacrosse: github.com/lowply/lacrosse",
+        "Changes": [
+            {
+                "Action": "UPSERT",
+                "ResourceRecordSet": {
+                    "Name": "${FQDN}",
+                    "Type": "${TYPE}",
+                    "TTL": ${TTL},
+                    "ResourceRecords": [
+                        {
+                            "Value": "${RECORD}"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+EOT
+}
+
+get_hosted_zone_id(){
+	local QUERY="HostedZones[?Name==\`${DOMAIN}.\`].Id"
+	HOSTED_ZONE_ID=$(${R53} list-hosted-zones --query "${QUERY}" --output text | sed -e 's|/hostedzone/||g')
+	echo ${HOSTED_ZONE_ID}
+}
+
+update_record_set(){
+	local QUERY="ChangeInfo.Id"
+	local CHANGE_ID=$(${R53} change-resource-record-sets --hosted-zone-id ${HOSTED_ZONE_ID} --change-batch "file://${BATCHFILE}" --query "${QUERY}" --output text | sed -e 's|/change/||g') 
+	echo ${CHANGE_ID}
+}
+
+wait_for_update(){
+	CHANGE_ID=$(update_record_set)
+	while true
+	do
+		STATUS=$(${R53} get-change --id ${CHANGE_ID} --query "ChangeInfo.Status" --output text)
+		echo "Status: ${STATUS}"
+		if [ "${STATUS}" = "INSYNC" ]; then
+			echo "Done"
+			break
+		fi
+		sleep 2
+	done
+}
+
+write_log(){
+	cat <<-EOL >> ${LOGFILE}
+
+		Executed on     : $(date)
+		Hosted zone ID  : ${HOSTED_ZONE_ID}
+		Public DNS name : ${FQDN}
+		Type            : ${TYPE}
+		Record          : ${RECORD}
+		TTL             : ${TTL}
+		Used profile    : ${PROFILE}
+	EOL
+}
+
+check_result(){
+	echo "Checking result..."
+	sleep 2
+	echo "host -t ${TYPE} ${FQDN}"
+	host -t ${TYPE} ${FQDN}
+}
+
+main(){
+	has host
+	has aws
+	[ $# -ne 5 ] && usage
+	[ -d ${HOME}/.cache ] || mkdir ${HOME}/.cache 
+
+	LOGFILE="${HOME}/.cache/lacrosse.log"
+	BATCHFILE="${HOME}/.cache/lacrosse_batch.json"
+	FQDN=$1
+	TYPE=$2
+	RECORD=$3
+	TTL=$4
+	PROFILE=$5
+	TLD=$(echo ${FQDN} | awk -F. '{print $NF}')
+	DOMAIN=$(echo ${FQDN} | awk -F. '{print $(NF-1)}').${TLD}
+	R53="aws --profile ${PROFILE} route53"
+	HOSTED_ZONE_ID=$(get_hosted_zone_id)
+	[ -z "${HOSTED_ZONE_ID}" ] && abort "\"${DOMAIN}\" not found in your Route53 zones."
+
+	generate_batchfile
+	wait_for_update
+	write_log
+	check_result
+}
+
+main $@
