@@ -6,5 +6,5 @@ run:
 build:
 	go build -o bin/lacrosse
 
-install:
+deps:
 	glide i
