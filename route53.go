@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -23,7 +22,7 @@ type Route53 struct {
 
 func NewRoute53(req *Request) (*Route53, error) {
 	sess, err := session.NewSession(&aws.Config{
-		Credentials: credentials.NewSharedCredentials("", os.Args[5]),
+		Credentials: credentials.NewSharedCredentials("", req.Profile),
 	})
 	if err != nil {
 		return nil, err
