@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"strconv"
 	"time"
 )
@@ -15,10 +16,36 @@ type Request struct {
 	Profile string
 }
 
+var records = []string{
+	"A",
+	"AAAA",
+	"CNAME",
+	"MX",
+	"PTR",
+	"TXT",
+}
+
+func contains(keyword string, list []string) bool {
+	for _, v := range list {
+		if keyword == v {
+			return true
+		}
+	}
+	return false
+}
+
 func NewRequest(args []string) (*Request, error) {
 	ttli64, err := strconv.ParseInt(args[4], 10, 64)
 	if err != nil {
 		return nil, err
+	}
+
+	if !contains(args[2], records) {
+		return nil, errors.New("Invalid record type")
+	}
+
+	if ttli64 > 86400 {
+		return nil, errors.New("TTL can't be more than 86400 seconds")
 	}
 
 	req := &Request{
