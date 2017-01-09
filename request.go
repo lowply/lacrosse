@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"strconv"
 	"time"
 )
@@ -16,8 +15,8 @@ type Request struct {
 	Profile string
 }
 
-func NewRequest() (*Request, error) {
-	ttli64, err := strconv.ParseInt(os.Args[4], 10, 64)
+func NewRequest(args []string) (*Request, error) {
+	ttli64, err := strconv.ParseInt(args[4], 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -25,11 +24,11 @@ func NewRequest() (*Request, error) {
 	req := &Request{
 		Date:    time.Now().Format("2006/01/02 15:04:05 MST"),
 		Action:  "UPSERT",
-		Domain:  os.Args[1],
-		Type:    os.Args[2],
-		Value:   os.Args[3],
+		Domain:  args[1],
+		Type:    args[2],
+		Value:   args[3],
 		TTL:     ttli64,
-		Profile: os.Args[5],
+		Profile: args[5],
 	}
 
 	return req, nil

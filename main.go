@@ -65,7 +65,7 @@ func main() {
 	has("host")
 	has("aws")
 
-	req, err := NewRequest()
+	req, err := NewRequest(os.Args)
 	if err != nil {
 		abort(err)
 	}
