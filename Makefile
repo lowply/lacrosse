@@ -7,7 +7,7 @@ run:
 	go run *.go
 
 build:
-	go build -o bin/lacrosse
+	go build -o dist/lacrosse
 
 deps:
 	glide i
