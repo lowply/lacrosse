@@ -1,10 +1,11 @@
 language: go
 go:
 - 1.7.3
-before_deploy:
+install:
 - sudo add-apt-repository ppa:masterminds/glide && sudo apt-get update
 - sudo apt-get install glide
 - glide i
+before_deploy:
 - make build
 - mkdir -p $TRAVIS_BUILD_DIR/dist
 deploy:
