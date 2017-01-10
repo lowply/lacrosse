@@ -56,17 +56,12 @@ func (r *Route53) RequestChange() (*route53.ChangeResourceRecordSetsOutput, erro
 	if err != nil {
 		return nil, err
 	}
-
 	r.Id = id
-
 	params := r.CreateNewParams()
-	fmt.Println("New param created: \n\n" + params.GoString() + "\n")
-
 	resp, err := r.Client.ChangeResourceRecordSets(params)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Got response for the request: \n\n" + resp.GoString() + "\n")
 	return resp, nil
 }
 
