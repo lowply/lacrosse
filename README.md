@@ -1,6 +1,14 @@
 # lacrosse
 
-[lacrosse](https://en.wikipedia.org/wiki/La_Crosse,_Wisconsin) - A simple CLI tool to update DNS records on Amazon Route 53
+[![GitHub release](http://img.shields.io/github/release/lowply/lacrosse.svg?style=flat-square)][release]
+[![Travis](https://img.shields.io/travis/lowply/lacrosse.svg?style=flat-square)][travis]
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
+
+[release]: https://github.com/lowply/lacrosse/releases
+[travis]: https://travis-ci.org/lowply/lacrosse
+[license]: https://github.com/lowply/lacrosse/blob/master/LICENSE
+
+[La Crosse](https://en.wikipedia.org/wiki/U.S._Route_53#Major_intersections) - A simple CLI tool to update DNS records on Amazon Route 53.
 
 ## Usage
 
