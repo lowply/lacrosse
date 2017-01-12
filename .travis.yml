@@ -7,13 +7,14 @@ install:
 - sudo apt-get install glide -y
 - glide i
 before_deploy:
-- make build
+- go get github.com/mitchellh/gox
 - mkdir -p $TRAVIS_BUILD_DIR/dist
+- make build
 deploy:
   provider: releases
   skip_cleanup: true
   api_key:
     secure: JAnrj4VxFFHqj8/Battu8nI7AHPKJ+IQ9HDf+ro6mdwuPeti9/AAUd3uu1jvosqtK3Ul7oeCKGk4d3Ta+3RHkm9M0VSl/WYX11B7AwbNyZPV+nWNgPcD+RKOv8N+ovQ9TCkxBNawHCiiJHtnvL868xXlJu3FL+nU9d7Wmuy49c9awcZRbLA21fSfL81gKICR/rB9yvb7kVz/6BwQ5+27zmDMN9UgmnUobHTxSGBFdQgBjGIyM5tOH46cbC/5nYZPnPoafsQS8NMB5NDjero38YBdE3cy4V//Ir0PSrY8Zlqw/KWrlZv5SMQY53RZYE8Ef7hrJTEoks36AkuoC/25X/KASp8rNwofOKUeJbBNxxT/p6QCBTLWrvEXbR4cMrxc5PERYfk1TgjtajFVTVZKmEhEyDHyaU7ZEeZJ+FBXP6MsRr9Xh1SGAIH44jPJxD359GfafkVXh9xxNbVuk05x2XQC3C7YxXN6BEk2zlPDOq/dXtmLs+MGu/snYJK5Yr93r4cX0lUInqZZWpErY+LTLouOPbEQJw4rco5fAHNqXEyfL63/qsdqCGs9QBFkQB9V0kAMn0Fym3NAM8yBrOHEoSR0rEWehxS9p0sw97kMpDABu1sj47zZA7hhtTKev6OjGt1CLiXB97uiBwmCX6KoBbJpWoAL1XahijjybOnbIdA=
-  file: "$TRAVIS_BUILD_DIR/dist/lacrosse"
+  file: "$TRAVIS_BUILD_DIR/dist/*.{zip}"
   on:
     repo: lowply/lacrosse
