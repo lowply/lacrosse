@@ -18,3 +18,5 @@ deploy:
   file: "$TRAVIS_BUILD_DIR/dist/*.{zip}"
   on:
     repo: lowply/lacrosse
+    all_branches: true
+    tags: true
