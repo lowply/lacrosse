@@ -13,38 +13,27 @@
 ## Usage
 
 ```bash
-lacrosse [domain] [type] [record] [TTL] [awscli profile]
+lacrosse [domain] [type] [record] [TTL] [aws profile]
 ```
+
 Example:
 
 ```bash
-lacrosse test.lowply.com A 192.168.1.0 300 default
+lacrosse example.com A 93.184.216.34 300 default
 ```
 
 ## Requirements
 
 - macOS or Linux based platform
-- [awscli](https://aws.amazon.com/cli/) with the profile configured to have Route 53 permission
+- aws profile granted Route 53 read/write permission
 
 ## Installation
 
-- Download the latest version from the [release page](https://github.com/lowply/lacrosse/releases), unarchive it and put the binary into `/usr/local/bin`.
-- Or build by yourself:
-
-```bash
-$ git clone https://github.com/lowply/lacrosse.git
-$ cd lacrosse
-$ make build
-$ cp bin/lacrosse /usr/local/bin/
-```
+- Download the latest version from the [release page](https://github.com/lowply/lacrosse/releases), unarchive it and put the binary into `/usr/local/bin` or somewhere in your `$PATH`.
 
 ## Logs
 
-Logs will be recorded in JSON format.
-
-```bash
-~/.cache/lacrosse.log
-```
+Logs will be recorded in `~/.cache/lacrosse.log` file in JSON format.
 
 ## Development
 
