@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -9,7 +8,6 @@ import (
 	"path"
 )
 
-var logpath = os.Getenv("HOME") + "/.cache/lacrosse.log"
 var profile string
 
 func abort(e error) {
@@ -40,24 +38,9 @@ func check_dir(dirname string) {
 	}
 }
 
-func write_log(r *Route53) error {
-	check_dir(path.Dir(logpath))
-	logfile, err := os.OpenFile(logpath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		return err
-	}
-
-	b, err := json.Marshal(r.Req)
-	if err != nil {
-		return err
-	}
-
-	logfile.Write(b)
-	logfile.WriteString("\n")
-	return nil
-}
-
 func main() {
+	check_dir(path.Dir(logpath))
+
 	if len(os.Args) != 6 {
 		usage()
 	}
@@ -82,8 +65,5 @@ func main() {
 
 	r.CheckStatus(resp)
 
-	err = write_log(r)
-	if err != nil {
-		abort(err)
-	}
+	r.Logger()
 }

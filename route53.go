@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53/route53iface"
 )
 
+var logpath = os.Getenv("HOME") + "/.cache/lacrosse.log"
 var comment = "Updated by lacrosse: github.com/lowply/lacrosse"
 
 type Route53 struct {
@@ -99,4 +102,20 @@ func (r *Route53) CreateNewParams() *route53.ChangeResourceRecordSetsInput {
 		HostedZoneId: aws.String(r.Id),
 	}
 	return params
+}
+
+func (r *Route53) Logger() error {
+	logfile, err := os.OpenFile(logpath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+
+	b, err := json.Marshal(r.Req)
+	if err != nil {
+		return err
+	}
+
+	logfile.Write(b)
+	logfile.WriteString("\n")
+	return nil
 }
