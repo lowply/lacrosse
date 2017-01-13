@@ -55,20 +55,6 @@ func (r *Route53) GetHostedZoneId(domain string) (string, error) {
 	return "", errors.New("Domain " + domain + " was not found in the hosted zone list.")
 }
 
-func (r *Route53) RequestChange() (*route53.ChangeResourceRecordSetsOutput, error) {
-	id, err := r.GetHostedZoneId(r.Req.Domain)
-	if err != nil {
-		return nil, err
-	}
-	r.Id = id
-	params := r.CreateNewParams()
-	resp, err := r.Client.ChangeResourceRecordSets(params)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
 func (r *Route53) CheckStatus(resp *route53.ChangeResourceRecordSetsOutput) error {
 	id := &route53.GetChangeInput{Id: resp.ChangeInfo.Id}
 	fmt.Println("Waiting for request " + *id.Id + " to be reflected...")
@@ -120,5 +106,31 @@ func (r *Route53) Logger() error {
 
 	logfile.Write(b)
 	logfile.WriteString("\n")
+	return nil
+}
+
+func (r *Route53) RequestChange() error {
+	id, err := r.GetHostedZoneId(r.Req.Domain)
+	if err != nil {
+		return err
+	}
+	r.Id = id
+
+	params := r.CreateNewParams()
+
+	resp, err := r.Client.ChangeResourceRecordSets(params)
+	if err != nil {
+		return err
+	}
+
+	err = r.CheckStatus(resp)
+	if err != nil {
+		return err
+	}
+
+	err = r.Logger()
+	if err != nil {
+		return err
+	}
 	return nil
 }
