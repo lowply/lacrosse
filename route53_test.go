@@ -21,7 +21,7 @@ type mockRoute53Client struct {
 
 func NewMockRoute53() *Route53 {
 	args := strings.Split(query, " ")
-	req, _ := NewRequest(args)
+	req, _ := NewRequest(args[1:])
 
 	r := &Route53{
 		Client: &mockRoute53Client{},
@@ -81,7 +81,7 @@ func TestRoute53_GetHostedZoneId(t *testing.T) {
 
 func TestRoute53_RequestChange(t *testing.T) {
 	r := NewMockRoute53()
-	_, err := r.RequestChange()
+	err := r.RequestChange()
 	if err != nil {
 		t.Errorf("Error: ", err)
 	}

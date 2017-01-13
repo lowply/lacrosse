@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/route53/route53iface"
 )
 
+var logpath = os.Getenv("HOME") + "/.cache/lacrosse.log"
 var comment = "Updated by lacrosse: github.com/lowply/lacrosse"
 
 type Route53 struct {
@@ -51,20 +55,6 @@ func (r *Route53) GetHostedZoneId(domain string) (string, error) {
 	return "", errors.New("Domain " + domain + " was not found in the hosted zone list.")
 }
 
-func (r *Route53) RequestChange() (*route53.ChangeResourceRecordSetsOutput, error) {
-	id, err := r.GetHostedZoneId(r.Req.Domain)
-	if err != nil {
-		return nil, err
-	}
-	r.Id = id
-	params := r.CreateNewParams()
-	resp, err := r.Client.ChangeResourceRecordSets(params)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
 func (r *Route53) CheckStatus(resp *route53.ChangeResourceRecordSetsOutput) error {
 	id := &route53.GetChangeInput{Id: resp.ChangeInfo.Id}
 	fmt.Println("Waiting for request " + *id.Id + " to be reflected...")
@@ -77,9 +67,6 @@ func (r *Route53) CheckStatus(resp *route53.ChangeResourceRecordSetsOutput) erro
 }
 
 func (r *Route53) CreateNewParams() *route53.ChangeResourceRecordSetsInput {
-	if r.Req.Type == "TXT" {
-		r.Req.Value = "\"" + r.Req.Value + "\""
-	}
 	params := &route53.ChangeResourceRecordSetsInput{
 		ChangeBatch: &route53.ChangeBatch{
 			Changes: []*route53.Change{
@@ -102,4 +89,48 @@ func (r *Route53) CreateNewParams() *route53.ChangeResourceRecordSetsInput {
 		HostedZoneId: aws.String(r.Id),
 	}
 	return params
+}
+
+func (r *Route53) Logger() error {
+	_ = os.Mkdir(path.Dir(logpath), 0777)
+
+	logfile, err := os.OpenFile(logpath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+
+	b, err := json.Marshal(r.Req)
+	if err != nil {
+		return err
+	}
+
+	logfile.Write(b)
+	logfile.WriteString("\n")
+	return nil
+}
+
+func (r *Route53) RequestChange() error {
+	id, err := r.GetHostedZoneId(r.Req.Domain)
+	if err != nil {
+		return err
+	}
+	r.Id = id
+
+	params := r.CreateNewParams()
+
+	resp, err := r.Client.ChangeResourceRecordSets(params)
+	if err != nil {
+		return err
+	}
+
+	err = r.CheckStatus(resp)
+	if err != nil {
+		return err
+	}
+
+	err = r.Logger()
+	if err != nil {
+		return err
+	}
+	return nil
 }

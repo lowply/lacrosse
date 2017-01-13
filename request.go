@@ -35,12 +35,12 @@ func contains(keyword string, list []string) bool {
 }
 
 func NewRequest(args []string) (*Request, error) {
-	ttli64, err := strconv.ParseInt(args[4], 10, 64)
+	ttli64, err := strconv.ParseInt(args[3], 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	if !contains(args[2], records) {
+	if !contains(args[1], records) {
 		return nil, errors.New("Invalid record type")
 	}
 
@@ -51,11 +51,15 @@ func NewRequest(args []string) (*Request, error) {
 	req := &Request{
 		Date:    time.Now().Format("2006/01/02 15:04:05 MST"),
 		Action:  "UPSERT",
-		Domain:  args[1],
-		Type:    args[2],
-		Value:   args[3],
+		Domain:  args[0],
+		Type:    args[1],
+		Value:   args[2],
 		TTL:     ttli64,
-		Profile: args[5],
+		Profile: args[4],
+	}
+
+	if req.Type == "TXT" {
+		req.Value = "\"" + req.Value + "\""
 	}
 
 	return req, nil
