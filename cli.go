@@ -24,13 +24,7 @@ func (c *CLI) Run(args []string) int {
 		return 1
 	}
 
-	req, err := NewRequest(os.Args[1:])
-	if err != nil {
-		fmt.Fprintln(c.err, err)
-		return 1
-	}
-
-	r, err := NewRoute53(req)
+	r, err := NewRoute53(os.Args)
 	if err != nil {
 		fmt.Fprintln(c.err, err)
 		return 1

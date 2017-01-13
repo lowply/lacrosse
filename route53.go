@@ -24,10 +24,17 @@ type Route53 struct {
 	Req    *Request
 }
 
-func NewRoute53(req *Request) (*Route53, error) {
-	sess, err := session.NewSession(&aws.Config{
+func NewRoute53(args []string) (*Route53, error) {
+	config := &aws.Config{
 		Credentials: credentials.NewSharedCredentials("", req.Profile),
-	})
+	}
+
+	sess, err := session.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := NewRequest(args[1:])
 	if err != nil {
 		return nil, err
 	}
