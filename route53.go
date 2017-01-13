@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -105,6 +106,8 @@ func (r *Route53) CreateNewParams() *route53.ChangeResourceRecordSetsInput {
 }
 
 func (r *Route53) Logger() error {
+	_ = os.Mkdir(path.Dir(logpath), 0777)
+
 	logfile, err := os.OpenFile(logpath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return err
