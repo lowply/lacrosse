@@ -77,9 +77,6 @@ func (r *Route53) CheckStatus(resp *route53.ChangeResourceRecordSetsOutput) erro
 }
 
 func (r *Route53) CreateNewParams() *route53.ChangeResourceRecordSetsInput {
-	if r.Req.Type == "TXT" {
-		r.Req.Value = "\"" + r.Req.Value + "\""
-	}
 	params := &route53.ChangeResourceRecordSetsInput{
 		ChangeBatch: &route53.ChangeBatch{
 			Changes: []*route53.Change{

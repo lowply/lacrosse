@@ -58,5 +58,9 @@ func NewRequest(args []string) (*Request, error) {
 		Profile: args[5],
 	}
 
+	if req.Type == "TXT" {
+		req.Value = "\"" + req.Value + "\""
+	}
+
 	return req, nil
 }
