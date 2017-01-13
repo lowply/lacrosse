@@ -25,16 +25,16 @@ type Route53 struct {
 }
 
 func NewRoute53(args []string) (*Route53, error) {
+	req, err := NewRequest(args[1:])
+	if err != nil {
+		return nil, err
+	}
+
 	config := &aws.Config{
 		Credentials: credentials.NewSharedCredentials("", req.Profile),
 	}
 
 	sess, err := session.NewSession(config)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := NewRequest(args[1:])
 	if err != nil {
 		return nil, err
 	}
