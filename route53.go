@@ -8,6 +8,8 @@ import (
 	"path"
 	"strings"
 
+	"golang.org/x/net/publicsuffix"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -48,7 +50,11 @@ func NewRoute53(args []string) (*Route53, error) {
 	return r, nil
 }
 
-func (r *Route53) GetHostedZoneId(domain string) (string, error) {
+func (r *Route53) GetHostedZoneId(fqdn string) (string, error) {
+	suffix, _ := publicsuffix.PublicSuffix(fqdn)
+	name := strings.Split(strings.Replace(fqdn, "."+suffix, "", -1), ".")
+	domain := name[len(name)-1] + "." + suffix
+
 	params := &route53.ListHostedZonesInput{}
 	resp, err := r.Client.ListHostedZones(params)
 	if err != nil {
