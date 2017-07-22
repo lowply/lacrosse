@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+const VERSION = "0.2.4"
+
 type CLI struct {
 	out io.Writer
 	err io.Writer
@@ -18,9 +20,15 @@ func NewCLI() *CLI {
 	}
 }
 
+func (c *CLI) usage() {
+	msg := "lacrosse version " + VERSION + "\n"
+	msg += "Usage : lacrosse [domain] [type] [value] [TTL] [aws profile]"
+	fmt.Fprintln(c.err, msg)
+}
+
 func (c *CLI) Run(args []string) int {
 	if len(os.Args) != 6 {
-		fmt.Fprintln(c.err, "Usage : lacrosse [domain] [type] [value] [TTL] [aws profile]")
+		c.usage()
 		return 1
 	}
 

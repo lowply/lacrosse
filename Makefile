@@ -8,7 +8,7 @@ test:
 	go test -v -parallel=4 .
 
 run:
-	go run *.go
+	go run cli.go main.go request.go route53.go
 
 clean:
 	rm -rf bin dist
