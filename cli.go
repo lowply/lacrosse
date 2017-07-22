@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const VERSION = "0.2.3"
+const VERSION = "0.2.4"
 
 type CLI struct {
 	out io.Writer
