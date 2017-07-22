@@ -1,13 +1,10 @@
 language: go
 go:
-- 1.7.3
+- 1.8.3
 install:
-- sudo add-apt-repository ppa:masterminds/glide -y
-- sudo apt-get update -q
-- sudo apt-get install glide -y
-- glide i
+- go get -u github.com/golang/dep/cmd/dep
+- go get -u github.com/mitchellh/gox
 before_deploy:
-- go get github.com/mitchellh/gox
 - mkdir -p $TRAVIS_BUILD_DIR/dist
 - make build
 deploy:
