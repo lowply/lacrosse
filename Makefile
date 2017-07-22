@@ -1,5 +1,9 @@
 default: test
 
+get:
+	go get -u github.com/golang/dep/cmd/dep
+	go get -u github.com/mitchellh/gox
+
 test:
 	go test -v -parallel=4 .
 
@@ -9,7 +13,7 @@ run:
 clean:
 	rm -rf bin dist
 
-deps:
+deps: get
 	dep ensure
 
 build: clean deps
