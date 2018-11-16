@@ -1,8 +1,7 @@
 default: test
 
 get:
-	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/mitchellh/gox
+	go get github.com/mitchellh/gox
 
 test:
 	go test -v -parallel=4 .
@@ -13,10 +12,7 @@ run:
 clean:
 	rm -rf bin dist
 
-deps: get
-	dep ensure
-
-build: clean deps
+build: get clean
 	mkdir bin dist
 	gox -osarch="darwin/amd64" \
 		-osarch="linux/amd64" \
