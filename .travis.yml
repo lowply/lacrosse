@@ -1,11 +1,10 @@
 language: go
 go:
-- 1.8.3
+- 1.11.1
 install:
-- make deps
+- make
 before_deploy:
 - mkdir -p $TRAVIS_BUILD_DIR/dist
-- make build
 deploy:
   provider: releases
   skip_cleanup: true
