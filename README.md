@@ -29,7 +29,9 @@ lacrosse example.com A 93.184.216.34 300 default
 
 ## Installation
 
-- Download the latest version from the [release page](https://github.com/lowply/lacrosse/releases), unarchive it and put the binary into `/usr/local/bin` or somewhere in your `$PATH`.
+```
+go get github.com/lowply/lacrosse
+```
 
 ## Logs
 
@@ -40,7 +42,7 @@ Logs will be recorded in `~/.cache/lacrosse.log` file in JSON format.
 ```bash
 $ git clone https://github.com/lowply/lacrosse.git
 $ cd lacrosse
-$ make deps
+$ make
 ```
 
 ## License
