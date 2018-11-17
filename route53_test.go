@@ -71,7 +71,7 @@ func TestRoute53_GetHostedZoneId(t *testing.T) {
 	r := NewMockRoute53()
 	id, err := r.GetHostedZoneId("example.com")
 	if err != nil {
-		t.Errorf("Error: ", err)
+		t.Errorf("Error: %v", err)
 	}
 	expected := "Z3EVG1FTEI7PMH"
 	if id != expected {
@@ -83,7 +83,7 @@ func TestRoute53_RequestChange(t *testing.T) {
 	r := NewMockRoute53()
 	err := r.RequestChange()
 	if err != nil {
-		t.Errorf("Error: ", err)
+		t.Errorf("Error: %v", err)
 	}
 }
 
@@ -100,6 +100,6 @@ func TestRoute53_CheckStatus(t *testing.T) {
 	}
 	err := r.CheckStatus(resp)
 	if err != nil {
-		t.Errorf("Error: ", err)
+		t.Errorf("Error: %v", err)
 	}
 }
